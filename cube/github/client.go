@@ -76,7 +76,6 @@ func GetReleaseByTag(
 func DownloadAsset(
 	ctx context.Context, client DownloadReleaseAssetClient, params DonwnloadAssetParams,
 ) (io.ReadCloser, error) {
-
 	r, redirectURL, err := client.DownloadReleaseAsset(
 		ctx, params.Owner, params.Repo, params.ID)
 	if err != nil {
@@ -85,6 +84,5 @@ func DownloadAsset(
 	if redirectURL != "" {
 		return download.Download(ctx, &http.Client{}, redirectURL, download.Option{})
 	}
-
 	return r, nil
 }
