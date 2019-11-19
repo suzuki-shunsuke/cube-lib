@@ -16,7 +16,7 @@ type (
 func Download(
 	ctx context.Context, client *http.Client, uri string, option Option,
 ) (io.ReadCloser, error) {
-	req, err := http.NewRequest("GET", uri, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", uri, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -26,7 +26,6 @@ func Download(
 	}
 	req.Header = header
 
-	req = req.WithContext(ctx)
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
