@@ -1,0 +1,23 @@
+---
+kind: pipeline
+name: build
+volumes:
+- name: gopath
+  temp: {}
+steps:
+- name: download go modules
+  image: &image_go golang:1.13.4
+  commands:
+  - go mod download
+  volumes: &volumes
+  - name: gopath
+    path: /go
+  environment:
+    GOPATH: /go
+- name: golangci-lint
+  image: golangci/golangci-lint:v1.21.0
+  commands:
+  - golangci-lint run
+  environment:
+    GOPATH: /go
+  volumes: *volumes
