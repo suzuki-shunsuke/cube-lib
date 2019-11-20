@@ -29,6 +29,15 @@ type (
 		DownloadReleaseAsset(ctx context.Context, owner, repo string, id int64) (rc io.ReadCloser, redirectURL string, err error)
 	}
 
+	GetLatestReleaseClient interface {
+		GetLatestRelease(ctx context.Context, owner, repo string) (*github.RepositoryRelease, *github.Response, error)
+	}
+
+	GetLatestReleaseParams struct {
+		Owner string
+		Repo  string
+	}
+
 	GetReleaseByTagParams struct {
 		Owner string
 		Repo  string
@@ -85,4 +94,26 @@ func DownloadAsset(
 		return download.Download(ctx, &http.Client{}, redirectURL, download.Option{})
 	}
 	return r, nil
+}
+
+func GetLatestRelease(
+	ctx context.Context, client GetLatestReleaseClient, params GetLatestReleaseParams,
+) (*github.RepositoryRelease, error) {
+	if client == nil {
+		return nil, errors.New("*github.Client is nil")
+	}
+	release, resp, err := client.GetLatestRelease(ctx, params.Owner, params.Repo)
+	if err != nil {
+		return nil, fmt.Errorf(
+			"failed to get a GitHub latest release %s %s: %w",
+			params.Owner, params.Repo, err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode >= 400 {
+		return nil, fmt.Errorf(
+			"failed to get GitHub release %s %s: status code %d >= 400",
+			params.Owner, params.Repo, resp.StatusCode)
+	}
+
+	return release, nil
 }
